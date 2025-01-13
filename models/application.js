@@ -5,7 +5,7 @@ const applicationSchema = new mongoose.Schema({
     appId: {
         type: String,
         required: true,
-        // unique: true
+        unique: true
     },
     studId: {
         type: String,

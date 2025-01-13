@@ -19,7 +19,7 @@ const educationSchema = new mongoose.Schema({
         required: true,
     },
    
-    school: {
+    schoolId: {
         type: String,
         required: true,
     },

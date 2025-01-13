@@ -5,7 +5,7 @@ const Education = require('../models/education')
 const academicDetailsHandler = async (req, res) => {
     
     try {
-        const { academicYear, enrollNo, eduLevel, currentClass, school} = req.body;
+        const { academicYear, enrollNo, eduLevel, currentClass, schoolId} = req.body;
 
         // const studentId = req.session?.studId;
         // console.log(studentId);
@@ -24,7 +24,7 @@ const academicDetailsHandler = async (req, res) => {
             enrollNo,
             eduLevel,
             currentClass,            
-            school,
+            schoolId,
             appId,
         });
 

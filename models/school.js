@@ -1,12 +1,23 @@
 const mongoose = require('mongoose');
 
 const schoolSchema = new mongoose.Schema({
+    schoolId: {
+        type: String,
+        required: true,
+        unique: true,
+    },
     schoolName: {
         type: String
     },
-    schoolDistrict: {
+    schoolDistt: {
         type: String
     },
+    schoolAddr: {
+        type: String,
+    },
+    schoolCity: {
+        type: String,
+    }
 
 })
 
