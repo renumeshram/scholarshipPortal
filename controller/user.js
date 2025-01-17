@@ -41,6 +41,9 @@ const registerStudent = async (req, res )=>{
 
     }catch(error){
         if(error.code === 11000) return res.json("User already registered. Please Login...");
+        
+        console.log(error);
+        
         res.status(500).json("Internal Server Error")
     }
 }

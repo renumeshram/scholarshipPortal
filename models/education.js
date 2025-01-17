@@ -10,18 +10,20 @@ const educationSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
-    eduLevel: {
-        type: String,
-        required: true,
-    },
     currentClass: {
         type: String,
         required: true,
     },
    
     schoolId: {
+        // type: mongoose.SchemaTypes.ObjectId, //referring to schoolId
+        // ref:'School',
         type: String,
-        required: true,
+        required: true, //need some logic
+    },
+
+    otherSchool: {
+        type: String
     },
     
     appId: {

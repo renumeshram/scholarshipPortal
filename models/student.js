@@ -20,17 +20,21 @@ const studentSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    gender: {
+    dob: {
         type: String,
         required: true,
     },
-    caste: {
+    gender: {//enum : MALE, FEMALE
         type: String,
         required: true,
+        "enum": ["MALE", "FEMALE"],
+        set: (value) => value.toUpperCase()
     },
-    mobNo: {
+    caste: { //enum
         type: String,
         required: true,
+        "enum": ["ST", "SC", "OBC", "GEN"],
+        set: (value) => value.toUpperCase()
     },
     address: {
         type: String ,
@@ -39,15 +43,20 @@ const studentSchema = new mongoose.Schema({
     district: {
         type: String,
         required: true,
+    }, 
+    mobNo: {
+        type: String,
+        required: true,
+    },
+    email:{
+        type:String,
+        required:false
     },
     password: {
         type: String,
         required: true,
-    },
-    dob: {
-        type: String,
-        required: true,
-    }
+    },   
+   
 })
 
 studentSchema.pre('save', function(next){

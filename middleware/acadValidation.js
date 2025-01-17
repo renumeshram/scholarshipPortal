@@ -6,7 +6,7 @@ const validateAcadDetails = async (req, res, next)=>{
 
     if([academicYear, enrollNo, eduLevel, currentClass, schoolName, schoolAddr, schoolDistt].some((field)=> field?.trim() === "")){
         return res.status(400).json({
-            success:false,
+            success: false,
             message: "All fields are required...",
             statusCode:400
         })

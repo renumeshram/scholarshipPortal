@@ -3,6 +3,7 @@ const router = express.Router();
 
 const validateRegistration = require('../middleware/validation')
 const validateAcadDetails = require('../middleware/acadValidation')
+const validateBankDetails = require('../middleware/bankValidation')
 const isLoggedIn = require('../middleware/isLoggedIn')
 
 const {
@@ -11,6 +12,7 @@ const {
 } = require('../controller/user')
 
 const academicDetailsHandler = require('../controller/acadDetails')
+const bankDetailsHandler = require('../controller/bankDetails')
 
 router.get("/", (req, res)=>{
     // if(err) return console.log(err);
@@ -18,12 +20,14 @@ router.get("/", (req, res)=>{
     res.send("Welcome")    
 })
 
-router.post("/Register",validateRegistration, registerStudent)
+router.post("/register",validateRegistration, registerStudent)
 
-router.post("/Login", loginHandler)
+router.post("/login", loginHandler)
 
 
-router.post("/Academic-details",isLoggedIn,validateAcadDetails ,academicDetailsHandler)
+router.post("/academic-details",isLoggedIn,validateAcadDetails ,academicDetailsHandler)
+
+router.post("/bank-details", isLoggedIn, validateBankDetails,bankDetailsHandler)
 
 
 module.exports = router
