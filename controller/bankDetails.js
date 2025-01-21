@@ -10,7 +10,9 @@ const bankDetailsHandler = async(req , res) =>{
 
         const existingBankDetails = await Bank.findOne({appId});
 
-        if(existingBankDetails) return res.json({ msg: "Bank details are already added. Proceed to next step "})
+        if(existingBankDetails) {
+            return res.json({ msg: "Bank details are already added. Proceed to next step "})
+        }
 
         const bankDetails = await Bank.create({
             accountNo,
@@ -26,11 +28,10 @@ const bankDetailsHandler = async(req , res) =>{
             success: true,
             msg: "Bank details added Successfully",
             statusCode: 200
-        })
-        
+        })       
 
     }catch(error){
-        if (error.code == 11000){
+        if (error.code === 11000){
             console.log(error);
             
             return res.json({ msg: "Duplicate Entry!! Please enter valid details..."});

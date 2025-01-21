@@ -71,6 +71,7 @@ const loginHandler = async(req, res)=>{
                 
 
                 req.session.appId = application.appId;
+                req.session.caste = student.caste;
                 console.log("Login Successful", req.session);
 
                 return res.status(200).json({ msg: "Successfully LoggedIn"})
