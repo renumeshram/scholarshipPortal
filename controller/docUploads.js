@@ -1,10 +1,8 @@
 const cloudinary = require('../uploads/cloudinary');
 const Document = require('../models/document')
-const upload = require('../utils/multerConfig');
 const fs = require('fs');
 const path = require('path');
 const { categories, dirPath } = require("../constants/");
-
 
 const docUploads = async (req, res) => {
     try {
@@ -18,16 +16,23 @@ const docUploads = async (req, res) => {
 
         if (caste !== categories.GEN && !req.files?.casteCertificate) {
 
-            return res.status(400).json({ success: false, msg: "Caste Certificate is necessary for Non-General category students" });
+            return res.status(400).json({
+                success: false,
+                msg: "Caste Certificate is necessary for Non-General category students",
+                statusCode: 400,
+            });
         }
 
         if (caste === categories.GEN && req.files?.casteCertificate) {
 
-            return res.status(400).json({ msg: "Caste Certificate is not required for General category students" });
+            return res.status(400).json({
+                msg: "Caste Certificate is not required for General category students",
+                statusCode: 400,
+            });
         }
 
         //Extracting data
-        const { idProof, birthCertificate, casteCertificate, domicileCertificate, incomeCertificate, passbookCertificate, prevMarksheet, bplCertificate, gapCertificate, instituteAckCertificate } = req.files
+        const { birthCertificate, casteCertificate, domicileCertificate, incomeCertificate, passbookCertificate, prevMarksheet, bplCertificate, gapCertificate, instituteAckCertificate } = req.files
 
 
         //uploading to cloudinary
@@ -51,11 +56,11 @@ const docUploads = async (req, res) => {
 
         //storing the cloudinary url
         const uploads = {
-            idProof: idProof ? await uploadToCloudinary(idProof) : null,
+            // idProof: idProof ? await uploadToCloudinary(idProof) : null,
             birthCertificate: birthCertificate ? await uploadToCloudinary(birthCertificate) : null,
             casteCertificate: casteCertificate ? await uploadToCloudinary(casteCertificate) : null,
             domicileCertificate: domicileCertificate ? await uploadToCloudinary(domicileCertificate) : null,
-            incomeCertificate: idProof ? await uploadToCloudinary(incomeCertificate) : null,
+            incomeCertificate: incomeCertificate ? await uploadToCloudinary(incomeCertificate) : null,
             passbookCertificate: passbookCertificate ? await uploadToCloudinary(passbookCertificate) : null,
             prevMarksheet: prevMarksheet ? await uploadToCloudinary(prevMarksheet) : null,
             bplCertificate: bplCertificate ? await uploadToCloudinary(bplCertificate) : null,
@@ -64,11 +69,11 @@ const docUploads = async (req, res) => {
         }
 
 
-        const updocs = await Document.findOneAndUpdate(
-            { appId: appId },
+        const upDocs = await Document.findOneAndUpdate(
+            { appId: appId }, //query to match the document
 
-            {
-                idProof: uploads.idProof,
+            {                                       //updates
+                // idProof: uploads.idProof,        
                 birthUrl: uploads.birthCertificate,
                 casteUrl: uploads.casteCertificate,
                 domicileUrl: uploads.domicileCertificate,
@@ -81,10 +86,11 @@ const docUploads = async (req, res) => {
                 appId: appId,
             },
 
-            { new: true, upsert: true } //upsert: true for if appId already there then update details else creates one
+            { new: true, upsert: true }     //options
+            //upsert: true for: if appId already there then update details else creates one
         )
 
-        console.log("Uploaded Docs", updocs);
+        console.log("Uploaded Docs", upDocs);
 
         return res.status(200).json({
             success: true,
@@ -115,16 +121,16 @@ const docUploads = async (req, res) => {
                     const filePath = `${dirPath}/${file}`;
 
                     fs.unlinkSync(filePath, (error) => {
-                        if (error) console.log("Error!!! in deleting file", error);
+                        if (error) console.log("Error in deleting temp file", error);
 
                     })
 
                 }
-                console.log("All files have been deleted..");
+                console.log("All temp files have been deleted..");
 
             }
             catch (error) {
-                console.log("Error in deleting files", error);
+                console.log("Error! Something went wrong while deleting temp files", error);
 
             }
         }

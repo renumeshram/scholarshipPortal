@@ -2,15 +2,11 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 const studentSchema = new mongoose.Schema({
-    studId: {
-        type: String,
-        required: true,
-        unique: true,
-    },
     aadharNo: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        index:true
     },
     fullName: {
         type: String,
@@ -55,7 +51,12 @@ const studentSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-    },   
+    }, 
+    financialYear:{
+        type: Map,
+        of: String,
+        default: {}
+    }
    
 })
 

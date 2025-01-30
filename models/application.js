@@ -8,9 +8,11 @@ const applicationSchema = new mongoose.Schema({
         unique: true
     },
     studId: {
-        type: String,
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: 'Student',
         required: true,
     },
+    
    
 })
 

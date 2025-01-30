@@ -1,4 +1,4 @@
-const Education = require('../models/education');
+// const Education = require('../models/education');
 
 const validateAcadDetails = async (req, res, next)=>{
 
@@ -12,11 +12,6 @@ const validateAcadDetails = async (req, res, next)=>{
         })
 
     }
-    // check = await Education.findOne({enrollNo});
-
-    // if(check){
-    //     return res.status(400).json("This Enrollment number has already been registered. Enter valid Enrollment No.")
-    // }
     
     next()
     

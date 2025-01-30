@@ -1,4 +1,4 @@
-const multer = require('../utils/multerConfig');
+const multer = require('../config/multerConfig');
 
 const uploadMiddleware = multer.fields([
 

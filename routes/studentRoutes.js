@@ -8,9 +8,9 @@ const uploadMiddleware = require('../middleware/uploadMiddleware')
 const isLoggedIn = require('../middleware/isLoggedIn')
 
 const {
-    registerStudent,
+    registerHandler,
     loginHandler,
-} = require('../controller/user')
+} = require('../controller/studentRegLogin')
 
 const academicDetailsHandler = require('../controller/acadDetails')
 const bankDetailsHandler = require('../controller/bankDetails')
@@ -22,7 +22,7 @@ router.get("/", (req, res)=>{
     res.send("Welcome")    
 })
 
-router.post("/register",validateRegistration, registerStudent)
+router.post("/register",validateRegistration, registerHandler)
 
 router.post("/login", loginHandler)
 
