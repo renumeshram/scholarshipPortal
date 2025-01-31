@@ -1,17 +1,12 @@
 const express = require('express');
 const app = express()
-
 const mongoose = require('mongoose');
 const session = require('express-session');
-const path = require('path')
-const fs = require('fs')
-
 
 const studRoutes = require('./routes/studentRoutes')
 
 require('dotenv').config()
 const port = process.env.PORT;
-
 
 app.set('view engine', 'ejs');
 

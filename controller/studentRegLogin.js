@@ -13,8 +13,6 @@ const registerHandler = async (req, res) => {
     try {
         const { aadharNo, fullName, fatherName, dob, gender, caste, mobNo, address, district, password } = req.body;
 
-        // const studId = Math.floor(Date.now() / 1000);
-
         const newUser = await Student.create({
             aadharNo,
             fullName,

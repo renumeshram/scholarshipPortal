@@ -1,9 +1,7 @@
 
 // generateAppId
-async function generateAppId(finYear = "202425") {
-    // let finYear = getCurrentFinancialYear()
+async function generateAppId(finYear) {
     // use nano id
-
     try{
 
         const {customAlphabet } = await import('nanoid');
@@ -11,10 +9,10 @@ async function generateAppId(finYear = "202425") {
         const nanoid =  customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 6);
         
         const uniqueId = nanoid();
-        console.log("🚀 ~ generateAppId ~ uniqueId:", uniqueId)
+        // console.log("🚀 ~ generateAppId ~ uniqueId:", uniqueId)
 
         const appId = finYear + uniqueId;
-        // console.log(appId);
+        // console.log("🚀 ~ generateAppId ~ appId:", appId)
         return appId
     }
     catch(error){
@@ -22,7 +20,7 @@ async function generateAppId(finYear = "202425") {
     }
 }
 
-generateAppId()
+// generateAppId()
 
 module.exports= generateAppId;
 
