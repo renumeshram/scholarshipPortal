@@ -122,7 +122,6 @@ const docUploads = async (req, res) => {
 
                     fs.unlinkSync(filePath, (error) => {
                         if (error) console.log("Error in deleting temp file", error);
-
                     })
 
                 }

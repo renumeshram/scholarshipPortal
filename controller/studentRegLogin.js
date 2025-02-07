@@ -1,5 +1,6 @@
 const Student = require('../models/student')
 const Application = require('../models/application')
+const bcrypt = require('bcrypt')
 
 const generateAppId = require('../utils/generateAppId');
 const getCurrentFinancialYear  = require('../utils/getCurrentFinancialYear');
@@ -24,6 +25,7 @@ const registerHandler = async (req, res) => {
             district,
             address,
             password,
+            maskedAadhar: aadharNo.slice(-4),
             financialYear: {
                 [finYear]: null,
             }
@@ -32,10 +34,10 @@ const registerHandler = async (req, res) => {
         console.log("New Student Details Added:", newUser);
 
 
-        res.status(200).json({
+        res.status(201).json({
             success: true,
             msg: "Registration Successful",
-            statusCode: 200,
+            statusCode: 201,
         });
 
     } catch (error) {
@@ -57,17 +59,30 @@ const loginHandler = async (req, res) => {
     try {
         const { aadharNo, password } = req.body;
 
-        const student = await Student.findOne({ aadharNo }); //can't exclude pw as it's verification cb isn't working
+        const students = await Student.find({ maskedAadhar: aadharNo.slice(-4) }); //can't exclude pw as it's verification cb isn't working  & it will return array of entries having same masked aadharNo
 
-        if (!student) return res.json({ msg: "Student not found. Please register..." });
+        if (students.length === 0) return res.json({ msg: "Student not found. Please register..." });
 
+        let studentFound = null;
+
+       for(let student of students){
+        const isMatch = await bcrypt.compare(aadharNo, student.aadharNo);
+        if(isMatch){
+            studentFound = student;
+            break;
+        }
+       }
+
+        if(!studentFound){
+            return res.json({msg: "Student not found....Please register!!!"})
+        }
         
-            student.checkpw(password, async function (err, result) {
+            studentFound.checkpw(password, async function (err, result) {
                 if (err) return next(err)
 
                 if (!result) return res.status(400).json({ msg: "Invalid Password" });
 
-                const studId = student._id;
+                const studId = studentFound._id;
 
                 req.session.studId = studId;
 
@@ -75,12 +90,12 @@ const loginHandler = async (req, res) => {
 
                 try {
 
-                    if (!(student.financialYear.has(finYear)) || student.financialYear.get(finYear) === null) {
+                    if (!(studentFound.financialYear.has(finYear)) || studentFound.financialYear.get(finYear) === null) {
 
                         const appId = await generateAppId(finYear);
                         console.log(appId);
 
-                        student.financialYear.set(finYear, appId);
+                        studentFound.financialYear.set(finYear, appId);
 
                         const newApplication = await Application.create({
                             appId,
@@ -89,7 +104,7 @@ const loginHandler = async (req, res) => {
 
                         console.log("New Application", newApplication);
 
-                        await student.save();
+                        await studentFound.save();
 
                     }
                 }
@@ -99,8 +114,8 @@ const loginHandler = async (req, res) => {
                     return res.status(500).json({ msg: "Something went wrong!" })
                 }
 
-                req.session.appId = student.financialYear.get(finYear);
-                req.session.caste = student.caste;
+                req.session.appId = studentFound.financialYear.get(finYear);
+                req.session.caste = studentFound.caste;
                 console.log("Login Successful", req.session);
 
                 return res.status(200).json({ 

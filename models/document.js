@@ -8,10 +8,7 @@ const docSchema = new mongoose.Schema({
         unique: true,
         index:true
     },
-    // idProof:{
-    //     type: String,
-    //     required: true,
-    // },
+   
     birthUrl: {
         type: String,
         required: true,
