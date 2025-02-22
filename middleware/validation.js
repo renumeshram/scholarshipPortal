@@ -9,7 +9,7 @@ const validateRegistration = (req, res, next) => {
     const { aadharNo, fullName, fatherName, dob, gender, caste, mobNo, address, district, password, cpassword } = req.body;
 
     const aadharNoRegex = /^\d{12}$/;
-    const mobNoRegex = /^[6-9]\d{9}$/;
+    const mobNoRegex = /^[1-9]\d{9}$/;
     const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@#$%!?*&])[a-zA-Z\d@#$%!?*&]{8,}$/
     const dobRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0,1,2])\/(19|20)\d{2}$/
 

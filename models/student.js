@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+const encryptAadhar = require('../utils/encryptAadhar')
 
 const studentSchema = new mongoose.Schema({
   aadharNo: {
     type: String,
     required: true,
     unique: true,
-    index: true,
   },
   fullName: {
     type: String,
@@ -57,6 +57,7 @@ const studentSchema = new mongoose.Schema({
   maskedAadhar: {
     type: String,
     required: true,
+    index:true
   },
   financialYear: {
     type: Map,
@@ -66,11 +67,12 @@ const studentSchema = new mongoose.Schema({
 });
 
 studentSchema.pre("save", async function (next) {
-  try {if (this.password && this.isModified("password")) {
+  try {
+    if (this.password && this.isModified("password")) {
     this.password = await bcrypt.hash(this.password, 10);
   }
-  if (this.aadharNo) {
-    this.aadharNo = await bcrypt.hash(this.aadharNo, 10);
+  if (this.aadharNo && this.isModified("aadharNo")) {
+    this.aadharNo = encryptAadhar(this.aadharNo);
   }
 
   next();
