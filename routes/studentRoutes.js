@@ -14,6 +14,7 @@ const {
     verifyOTPHandler,
     verifyLoginOTPHandler,
 } = require('../controller/studentRegLogin')
+const logoutHandler = require("../controller/logout")
 const {
     forgotPw,
     verifyOTPForPw,
@@ -25,7 +26,7 @@ const academicDetailsHandler = require('../controller/acadDetails')
 const bankDetailsHandler = require('../controller/bankDetails')
 const docUploads = require('../controller/docUploads')
 
-// const { sendOTP , verifyOTP } = require('../controller/twilioSms')
+const isAuthorized = require('../middleware/roleMiddleware');
 
 router.get("/", (req, res)=>{
     // if(err) return console.log(err);
@@ -42,9 +43,6 @@ router.post("/verify-forgotpw-otp", verifyOTPForPw);
 router.post("/reset-password", validateResetPw, resetPw);
 router.post("/change-password", isLoggedIn, changePw);
 
-// router.post("/send-otp/register",sendOTP);
-
-// router.post("/send-otp/login", sendOTP);
 
 router.post("/verify-otp", verifyOTPHandler)
 router.post("/verify-login-otp", verifyLoginOTPHandler)
@@ -55,6 +53,15 @@ router.post("/bank-details", isLoggedIn, validateBankDetails,bankDetailsHandler)
 
 router.post("/uploads", isLoggedIn, uploadMiddleware, docUploads)
 
+router.get("/dashboard", isLoggedIn, isAuthorized(["admin", "finance"]), (req, res)=>{
+    res.json({ msg: "WELCOME to the DASHBOARD!"})
+});
+
+router.get("/report", isLoggedIn, isAuthorized(["admin", "finance"]), (req, res)=>{
+    res.json({ msg: "Here is the report." });
+});
+
+router.post("/logout", logoutHandler)
 
 module.exports = router
 

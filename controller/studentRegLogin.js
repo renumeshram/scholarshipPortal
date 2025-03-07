@@ -5,6 +5,7 @@ const generateAppId = require('../utils/generateAppId');
 const getCurrentFinancialYear = require('../utils/getCurrentFinancialYear');
 const { sendOTP, verifyOTP } = require('../utils/twilioSms');
 const encryptAadhar = require('../utils/encryptAadhar');
+const { MAX_ATTEMPTS, LOCK_TIME } = require('../constants/index')
 
 const finYear = getCurrentFinancialYear();
 // console.log(finYear);
@@ -118,42 +119,48 @@ const verifyOTPHandler = async (req, res) => {
 const loginHandler = async (req, res) => {
     try {
         const { aadharNo, password } = req.body;
-        const purpose = 'Login';
-
+        
         // const students = await Student.find({ maskedAadhar: aadharNo.slice(-4) }); //can't exclude pw as it's verification cb isn't working  & it will return array of entries having same masked aadharNo
-
+        
         // if (students.length === 0) return res.json({ msg: "Student not found. Please register..." });
-
+        
         const encryptedAadhar = encryptAadhar(aadharNo);
         // console.log("🚀 ~ loginHandler ~ encryptedAadhar:", typeof(encryptedAadhar))
-
-
+        
+        
         let studentFound = await Student.findOne({ aadharNo: encryptedAadhar });
         console.log("🚀 ~ loginHandler ~ studentFound:", studentFound)
-
-
-        // for (let student of students) {
-        //     //    console.log(student);
-
-        //     const isMatch = bcrypt.compare(aadharNo, student.aadharNo)
-
-        //     if (isMatch) {
-        //         studentFound = student
-        //         console.log("🚀 ~ loginHandler ~ studentFound:", studentFound)
-        //         break;
-        //     }
-
-        // }
-
+        
+        
         if (!studentFound) {
             return res.json({ msg: "Student not found....Please register!!!" })
         }
-
+        
+        if(studentFound.isLocked && studentFound.lockUntil > Date.now()){
+            return res.status(403).json({ msg: "Account is locked. Try again later."})
+        }
+        
         studentFound.checkpw(password, async function (err, result) {
             if (err) return next(err)
-
-            if (!result) return res.status(400).json({ msg: "Invalid Password" });
-
+                
+                if (!result){
+                    studentFound.failedLoginAttempts += 1;
+                    
+                    if(studentFound.failedLoginAttempts >= MAX_ATTEMPTS){
+                        studentFound.isLocked = true;
+                        studentFound.lockUntil = Date.now() + LOCK_TIME;
+                    }
+                    
+                    await studentFound.save();
+                    return res.status(400).json({ msg: "Invalid Password" });
+                } 
+            
+                studentFound.failedLoginAttempts = 0;
+                studentFound.isLocked = false;
+                studentFound.lockUntil = null;
+                await studentFound.save();
+                
+            const purpose = 'Login';
             const sendOtpResponse = await sendOTP(studentFound.mobNo, purpose);
             if (!sendOtpResponse.success) {
                 return res.status(400).json({
@@ -162,6 +169,7 @@ const loginHandler = async (req, res) => {
             }
 
             req.session.tempStudId = studentFound._id;
+            req.session.tempRole = studentFound.role;
 
             res.status(200).json({
                 success: true,
@@ -200,6 +208,7 @@ const verifyLoginOTPHandler = async (req, res) => {
         }
 
         const studId = req.session.tempStudId;
+        const role = req.session.tempRole;
 
         if (!studId) {
             return res.status(400).json({
@@ -242,11 +251,13 @@ const verifyLoginOTPHandler = async (req, res) => {
         }
 
         req.session.studId = studentFound._id
+        req.session.role = role;
         req.session.appId = studentFound.financialYear.get(finYear);
         req.session.caste = studentFound.caste;
         console.log("Login Successful", req.session);
 
         delete req.session.tempStudId;
+        delete req.session.tempRole;
 
         return res.status(200).json({
             success: true,

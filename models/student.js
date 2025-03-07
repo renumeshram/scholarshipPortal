@@ -64,6 +64,23 @@ const studentSchema = new mongoose.Schema({
     of: String,
     default: {},
   },
+  role: {
+    type: String,
+    enum: ['admin', 'finance', 'student' ],
+    default: 'student'
+  },
+  failedLoginAttempts: {
+    type: Number,
+    default: 0,
+  },
+  isLocked: {
+    type: Boolean,
+    default: false,
+  },
+  lockUntil: {
+    type: Date,
+    default: null,
+  },
 });
 
 studentSchema.pre("save", async function (next) {
