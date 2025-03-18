@@ -7,13 +7,36 @@ const applicationSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    studId: {
+    userId: {
         type: mongoose.SchemaTypes.ObjectId,
-        ref: 'Student',
+        ref: 'User',
         required: true,
     },
+    status: {
+        type: String,
+        enum: ["DRAFT", "SUBMITTED", "APPROVED", "REJECTED"],
+        set: (value)=> value.toUpperCase(),
+    },
+    reviewedBy: {
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: 'User',
+    },
+    reviewedAt: {
+        type: Date,
+    }
     
-   
+}, { timestamps: true});
+
+applicationSchema.pre("save", async function(next){
+    try{
+        if(this.reviewedBy && this.isModified("reviewedBy")){
+            this.reviewedAt = new Date()
+        }
+        next();
+    }
+    catch(error){
+        return next(error);
+    }
 })
 
 const Application = mongoose.model('application', applicationSchema);

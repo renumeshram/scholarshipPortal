@@ -1,5 +1,5 @@
 const logoutHandler = (req, res) =>{
-    if(!req.session.studId){
+    if(!req.session.userId){
         return res.status(400).json({ msg: "No active session found."});
     }
 

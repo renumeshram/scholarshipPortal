@@ -2,9 +2,9 @@ const isLoggedIn =(req, res, next)=>{
     try {
         // console.log(req.session);
         
-        if (!req.session?.studId) return res.json({ msg: "You must login first" })
+        if (!req.session?.role) return res.json({ msg: "You must login first" })
         else {
-            console.log('Login: true',req.session.studId);
+            console.log('Login_role:',req.session.role);
             next()
         }
     }

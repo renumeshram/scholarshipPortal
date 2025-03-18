@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const encryptAadhar = require('../utils/encryptAadhar')
 
-const studentSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
   aadharNo: {
     type: String,
     required: true,
@@ -66,8 +66,9 @@ const studentSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['admin', 'finance', 'student' ],
-    default: 'student'
+    enum: ['ADMIN', 'FINANCE', 'STUDENT' ],
+    default: 'STUDENT',
+    set: (value) => value.toUpperCase(),
   },
   failedLoginAttempts: {
     type: Number,
@@ -83,7 +84,7 @@ const studentSchema = new mongoose.Schema({
   },
 });
 
-studentSchema.pre("save", async function (next) {
+userSchema.pre("save", async function (next) {
   try {
     if (this.password && this.isModified("password")) {
     this.password = await bcrypt.hash(this.password, 10);
@@ -98,12 +99,12 @@ studentSchema.pre("save", async function (next) {
 }
 })
 
-studentSchema.methods.checkpw = function (password, cb) {
+userSchema.methods.checkpw = function (password, cb) {
   bcrypt.compare(password, this.password, (err, result) => {
     return cb(err, result);
   });
 };
 
-const Student = mongoose.model("student", studentSchema);
+const User = mongoose.model("user", userSchema);
 
-module.exports = Student;
+module.exports = User;

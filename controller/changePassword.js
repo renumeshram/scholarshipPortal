@@ -1,4 +1,4 @@
-const Student = require('../models/student');
+const User = require('../models/user');
 const bcrypt = require('bcrypt');
 
 const changePw = async (req, res)=>{
@@ -6,13 +6,13 @@ const changePw = async (req, res)=>{
 
         const { currentPw, newPw } = req.body;
     
-        const studId = req.session.studId;
+        const userId = req.session?.userId;
     
-        const studFound = await Student.findById(studId);
+        const studFound = await User.findById(userId);
     
         if(!studFound){
             return res.status(400).json({
-                msg: 'Student not found'
+                msg: 'User not found'
             })
         }
     

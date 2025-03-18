@@ -1,11 +1,10 @@
-const Student = require('../models/student')
+const User = require('../models/user')
 const Application = require('../models/application')
-const bcrypt = require('bcrypt')
 const generateAppId = require('../utils/generateAppId');
 const getCurrentFinancialYear = require('../utils/getCurrentFinancialYear');
 const { sendOTP, verifyOTP } = require('../utils/twilioSms');
 const encryptAadhar = require('../utils/encryptAadhar');
-const { MAX_ATTEMPTS, LOCK_TIME } = require('../constants/index')
+const { MAX_ATTEMPTS, LOCK_TIME, userRole } = require('../constants/index')
 
 const finYear = getCurrentFinancialYear();
 // console.log(finYear);
@@ -17,8 +16,8 @@ const registerHandler = async (req, res) => {
         const encryptedAadhar = encryptAadhar(aadharNo);
         // console.log("🚀 ~ registerHandler ~ encryptedAadhar:", encryptedAadhar)
 
-        const existingStudent = await Student.findOne({ aadharNo: encryptedAadhar });
-        if (existingStudent) {
+        const existinguser = await User.findOne({ aadharNo: encryptedAadhar });
+        if (existinguser) {
             return res.status(400).json({ msg: "User already registered. Please login..." });
         }
         const purpose = 'Registration'
@@ -86,7 +85,7 @@ const verifyOTPHandler = async (req, res) => {
 
     const { aadharNo, fullName, fatherName, dob, gender, caste, address, district, password } = req.session.registrationData;
 
-    const newUser = await Student.create({
+    const newUser = await User.create({
         aadharNo,
         fullName,
         fatherName,
@@ -103,7 +102,7 @@ const verifyOTPHandler = async (req, res) => {
         }
     })
 
-    console.log("New Student Details Added:", newUser);
+    console.log("New user Details Added:", newUser);
 
     delete req.session.registrationData;
 
@@ -120,68 +119,63 @@ const loginHandler = async (req, res) => {
     try {
         const { aadharNo, password } = req.body;
         
-        // const students = await Student.find({ maskedAadhar: aadharNo.slice(-4) }); //can't exclude pw as it's verification cb isn't working  & it will return array of entries having same masked aadharNo
+        // const users = await User.find({ maskedAadhar: aadharNo.slice(-4) }); //can't exclude pw as it's verification cb isn't working  & it will return array of entries having same masked aadharNo
         
-        // if (students.length === 0) return res.json({ msg: "Student not found. Please register..." });
+        // if (users.length === 0) return res.json({ msg: "user not found. Please register..." });
         
         const encryptedAadhar = encryptAadhar(aadharNo);
         // console.log("🚀 ~ loginHandler ~ encryptedAadhar:", typeof(encryptedAadhar))
         
         
-        let studentFound = await Student.findOne({ aadharNo: encryptedAadhar });
-        console.log("🚀 ~ loginHandler ~ studentFound:", studentFound)
+        let userFound = await User.findOne({ aadharNo: encryptedAadhar });
+        console.log("🚀 ~ loginHandler ~ userFound:", userFound)
         
         
-        if (!studentFound) {
-            return res.json({ msg: "Student not found....Please register!!!" })
+        if (!userFound) {
+            return res.json({ msg: "user not found....Please register!!!" })
         }
         
-        if(studentFound.isLocked && studentFound.lockUntil > Date.now()){
+        if(userFound.isLocked && userFound.lockUntil > Date.now()){
             return res.status(403).json({ msg: "Account is locked. Try again later."})
         }
         
-        studentFound.checkpw(password, async function (err, result) {
+        userFound.checkpw(password, async function (err, result) {
             if (err) return next(err)
                 
                 if (!result){
-                    studentFound.failedLoginAttempts += 1;
+                    userFound.failedLoginAttempts += 1;
                     
-                    if(studentFound.failedLoginAttempts >= MAX_ATTEMPTS){
-                        studentFound.isLocked = true;
-                        studentFound.lockUntil = Date.now() + LOCK_TIME;
+                    if(userFound.failedLoginAttempts >= MAX_ATTEMPTS){
+                        userFound.isLocked = true;
+                        userFound.lockUntil = Date.now() + LOCK_TIME;
                     }
                     
-                    await studentFound.save();
+                    await userFound.save();
                     return res.status(400).json({ msg: "Invalid Password" });
                 } 
             
-                studentFound.failedLoginAttempts = 0;
-                studentFound.isLocked = false;
-                studentFound.lockUntil = null;
-                await studentFound.save();
+                userFound.failedLoginAttempts = 0;
+                userFound.isLocked = false;
+                userFound.lockUntil = null;
+                await userFound.save();
                 
             const purpose = 'Login';
-            const sendOtpResponse = await sendOTP(studentFound.mobNo, purpose);
+            const sendOtpResponse = await sendOTP(userFound.mobNo, purpose);
             if (!sendOtpResponse.success) {
                 return res.status(400).json({
                     msg: sendOtpResponse.msg
                 })
             }
 
-            req.session.tempStudId = studentFound._id;
-            req.session.tempRole = studentFound.role;
+            req.session.tempuserId = userFound._id;
+            req.session.tempRole = userFound.role;
 
             res.status(200).json({
                 success: true,
                 msg: "Otp sent to your mobile number.Please verify to complete login",
                 statusCode: 200,
             });
-
-
-
-            // console.log(student.financialYear.get(finYear));
-
-
+            // console.log(user.financialYear.get(finYear));
         })
 
     } catch (error) {
@@ -207,56 +201,56 @@ const verifyLoginOTPHandler = async (req, res) => {
             })
         }
 
-        const studId = req.session.tempStudId;
+        const userId = req.session.tempuserId;
         const role = req.session.tempRole;
 
-        if (!studId) {
+        if (!userId) {
             return res.status(400).json({
                 msg: 'Session expired. Please login again.'
             });
         }
 
-        const studentFound = await Student.findById(studId);
+        const userFound = await User.findById(userId);
 
-        if (!studentFound) {
+        if (!userFound) {
             return res.status(400).json({
-                msg: 'Student not found. Please register...'
+                msg: 'user not found. Please register...'
             });
         }
 
-        try {
-
-            if (!(studentFound.financialYear.has(finYear)) || studentFound.financialYear.get(finYear) === null) {
-
-                const appId = await generateAppId(finYear);
-                console.log(appId);
-
-                studentFound.financialYear.set(finYear, appId);
-
-                const newApplication = await Application.create({
-                    appId,
-                    studId,
-                })
-
-                console.log("New Application", newApplication);
-
-                await studentFound.save();
-
+        if(userFound.role === userRole.student){
+            try {
+                if (!(userFound.financialYear.has(finYear)) || userFound.financialYear.get(finYear) === null) {
+    
+                    const appId = await generateAppId(finYear);
+                    console.log(appId);
+    
+                    userFound.financialYear.set(finYear, appId);
+    
+                    const newApplication = await Application.create({
+                        appId,
+                        userId,
+                    })
+    
+                    console.log("New Application", newApplication);
+    
+                    await userFound.save();
+                }
             }
+            catch (error) {
+                console.log("Error in accessing & comparing the Academic Year", error);
+    
+                return res.status(500).json({ msg: "Something went wrong!" })
+            }
+            req.session.appId = userFound.financialYear.get(finYear);
         }
-        catch (error) {
-            console.log("Error in accessing & comparing the Academic Year", error);
 
-            return res.status(500).json({ msg: "Something went wrong!" })
-        }
-
-        req.session.studId = studentFound._id
+        req.session.userId = userFound._id
         req.session.role = role;
-        req.session.appId = studentFound.financialYear.get(finYear);
-        req.session.caste = studentFound.caste;
+        req.session.caste = userFound.caste;
         console.log("Login Successful", req.session);
 
-        delete req.session.tempStudId;
+        delete req.session.tempuserId;
         delete req.session.tempRole;
 
         return res.status(200).json({

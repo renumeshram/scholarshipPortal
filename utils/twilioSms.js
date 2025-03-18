@@ -8,7 +8,7 @@ const { TWILIO_ACC_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER } = process.env;
 const client = twilio(TWILIO_ACC_SID, TWILIO_AUTH_TOKEN);
 
 let otpStorage = {}; // Temp storage for OTPs
-let attempt = 0;
+// let attempt = 0;
 
 const sendOTP = async (mobNo, purpose) => {
     console.log("🚀 ~ sendOTP ~ purpose:", purpose)
@@ -33,11 +33,11 @@ const sendOTP = async (mobNo, purpose) => {
     
     // Send the OTP via SMS using Twilio's messaging service
     try {
-        await client.messages.create({
-            body: `Your OTP for BSSY ${purpose} is: ${otp}`, // Send your generated OTP
-            from: TWILIO_NUMBER, // Replace with your Twilio phone number
-            to: `+91`+mobNo
-        });
+        // await client.messages.create({
+        //     body: `Your OTP for BSSY ${purpose} is: ${otp}`, // Send your generated OTP
+        //     from: TWILIO_NUMBER, // Replace with your Twilio phone number
+        //     to: `+91`+mobNo
+        // });
         
         return { success: true, msg: 'OTP sent successfully.' };
     } catch (error) {

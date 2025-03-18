@@ -1,4 +1,4 @@
-const Student = require('../models/student');
+const User = require('../models/user');
 const encryptAadhar = require('../utils/encryptAadhar');
 const { sendOTP, verifyOTP } = require('../utils/twilioSms');
 
@@ -6,13 +6,13 @@ const forgotPw = async (req, res) => {
     try {
         const { aadharNo } = req.body;
         const encryptedAadhar = encryptAadhar(aadharNo)
-        studFound = await Student.findOne({ aadharNo: encryptedAadhar })
+        studFound = await User.findOne({ aadharNo: encryptedAadhar })
         console.log("🚀 ~ forgotPw ~ studFound:", studFound)
 
         if (!studFound) {
             return res.status(400).json({
                 success: false,
-                msg: 'Student not found. Please register first',
+                msg: 'User not found. Please register first',
                 statusCode: 400
             })
         }
@@ -28,11 +28,11 @@ const forgotPw = async (req, res) => {
         }
 
         req.session.mobNo = studFound.mobNo;
-        req.session.studId = studFound._id;
+        req.session.userId = studFound._id;
 
         // setTimeout(() => {
         //     req.session.mobNo = null;
-        //     req.session.studId = null;
+        //     req.session.userId = null;
         //     req.session.verified = false;
         // }, 15 * 60 * 1000);
 
@@ -99,14 +99,14 @@ const resetPw = async (req, res) => {
     try {
         const { newPassword } = req.body;
 
-        const student = await Student.findById(req.session.studId);
+        const user = await User.findById(req.session.userId);
 
-        if (!student) {
-            return res.status(400).json({ success: false, msg: 'Student not found' });
+        if (!user) {
+            return res.status(400).json({ success: false, msg: 'User not found' });
         }
 
-        student.password = newPassword;
-        await student.save();
+        user.password = newPassword;
+        await user.save();
 
         //clear session after successful reset
         req.session.destroy((err) => {

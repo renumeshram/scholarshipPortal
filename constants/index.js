@@ -1,3 +1,5 @@
+const { log } = require('console');
+
 require('dotenv').config
 
 // category constants
@@ -16,6 +18,22 @@ console.log("🚀 ~ cryptoIV:", cryptoIV.length)
 const MAX_ATTEMPTS = 5;
 const LOCK_TIME = 15 * 60 * 1000;
 
+const appStatus ={
+    'draft': 'DRAFT',
+    'submitted': 'SUBMITTED',
+    'approved': 'APPROVED',
+    'rejected': 'REJECTED',
+}
+
+const appAction = ["approve", "reject"];
+// console.log("🚀 ~ appAction:", appAction)
+// console.log("See this", appAction.includes('approve'));
+
+const userRole = {
+    'student' : 'STUDENT',
+    'admin' : 'ADMIN',
+    'finance' : 'FINANCE'
+}
 
 module.exports = {
     categories,
@@ -24,4 +42,7 @@ module.exports = {
     cryptoIV,
     MAX_ATTEMPTS,
     LOCK_TIME,
+    appStatus,
+    appAction,
+    userRole,
 }
