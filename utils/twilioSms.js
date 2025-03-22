@@ -33,6 +33,7 @@ const sendOTP = async (mobNo, purpose) => {
     
     // Send the OTP via SMS using Twilio's messaging service
     try {
+        //THIS IS COMMENTED FOR THE TESTING PURPOSE
         // await client.messages.create({
         //     body: `Your OTP for BSSY ${purpose} is: ${otp}`, // Send your generated OTP
         //     from: TWILIO_NUMBER, // Replace with your Twilio phone number

@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit')
 
 const studRoutes = require('./routes/studentRoutes')
 const adminRoutes = require('./routes/adminRoutes')
+const financeRoutes = require('./routes/financeRoutes')
 const rateLimiter = rateLimit({
     windowMs: 15* 60* 1000,
     max: 100,
@@ -21,7 +22,6 @@ app.use(express.json());
 app.use(rateLimiter);                                                                                                                                               
 app.use(express.urlencoded({ extended: true}))
 
-
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -29,8 +29,8 @@ app.use(session({
     cookie: { maxAge: 1000 * 60 * 60 },
 }))
 
-app.use('/', studRoutes);
-app.use('/admin', adminRoutes);
+app.use('/', studRoutes, adminRoutes, financeRoutes);
+// app.use('/admin', adminRoutes);
 
 mongoose.connect(process.env.MONGO_URL)
 .then(()=>{

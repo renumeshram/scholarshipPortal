@@ -1,10 +1,6 @@
 const mongoose = require('mongoose');
 
 const educationSchema = new mongoose.Schema({
-    academicYear: {
-        type: String,
-        required: true,
-    },
     enrollNo: {
         type: String,
         required: true,
@@ -30,7 +26,12 @@ const educationSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-    }
+    },
+    
+    eduLevel :{
+        type: String,
+        required: true,
+    },
 
     
 })

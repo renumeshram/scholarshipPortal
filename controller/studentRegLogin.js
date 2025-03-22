@@ -246,6 +246,7 @@ const verifyLoginOTPHandler = async (req, res) => {
         }
 
         req.session.userId = userFound._id
+        console.log("🚀 ~ verifyLoginOTPHandler ~ req.session.userId:", req.session.userId)
         req.session.role = role;
         req.session.caste = userFound.caste;
         console.log("Login Successful", req.session);

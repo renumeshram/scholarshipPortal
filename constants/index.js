@@ -35,6 +35,26 @@ const userRole = {
     'finance' : 'FINANCE'
 }
 
+const paymentAction = ['processed', 'failed'];
+
+const paymentStatusEnum = {
+    'pending' : 'PENDING',
+    'processed' : 'PROCESSED',
+    'failed' : 'FAILED'
+}
+
+const paymentAmount = {
+    '9th': 1000,
+    '10th': 1500,
+    '11th': 2000,
+    '12th': 2500,
+    'Undergraduate': 5000,
+    // 'postgraduate': 6000,
+    'Diploma': 4000,
+    'Medical': 5000,
+    'Engineering': 6000
+}
+
 module.exports = {
     categories,
     dirPath,
@@ -45,4 +65,7 @@ module.exports = {
     appStatus,
     appAction,
     userRole,
+    paymentStatusEnum,
+    paymentAction,
+    paymentAmount,
 }

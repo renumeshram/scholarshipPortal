@@ -1,7 +1,6 @@
-const express = require('express')
 
 const Application = require('../models/application');
-const { appAction } = require('../constants/index')
+const { appAction, appStatus } = require('../constants/index')
 // console.log("🚀 ~ appAction:", appAction, typeof(appAction))
 
 const getApplications = async (req, res) => {
@@ -41,7 +40,13 @@ const applicationAction = async (req, res) => {
             })
         }
 
-        application.status = action === appAction[0] ? "approved" : "rejected";
+        if(application.status === appStatus.approved){
+            return res.json({
+                msg: 'Application has already been approved.'
+            })
+        }
+
+        application.status = action === appAction[0] ? appStatus.approved : appStatus.rejected;
         application.reviewedBy = req.session.userId || null;
 
         await application.save();
